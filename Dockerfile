@@ -1,19 +1,28 @@
 FROM php:8.2-fpm
 
-LABEL name="ilian IGOUDJIL<ilianigoudjil@gmail.com>"
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libzip-dev \
+    && rm -rf /var/lib/apt/lists/* 
 
-RUN apt-get update
-RUN apt-get install -y nodejs
-RUN apt-get install -y npm
-RUN apt-get install -y curl
+# Install PHP extensions
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
-# Crée un dossier courant "app"
-WORKDIR /app
-# Copie le fichier "index.js" présent dans le dossier courant pour le mettre dans le dossier courant "app" de l'image créée
-COPY ./index.js ./index.js
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Lance la command "node index.js" dans le terminal (si on lance: "docker run -it exercice /bin/bash" ça va ignorer la command il faut lancer: "docker run exercice")
-# CMD node index.js
+# Install Node.js and npm
+RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
+    && apt-get install -y nodejs
 
-# Va afficher un utilisateur aléatoire lors du lancement du container ("docker run exercice2" après avoir build le container grâce à: "docker build -t exercice2 ." en étant dans le dossier courant du Dockerfile)
-CMD curl https://randomuser.me/api/
+# Set working directory
+WORKDIR /var/www/html
+
+CMD ["php-fpm"]
