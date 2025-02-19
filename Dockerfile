@@ -25,4 +25,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_16.x | bash - \
 # Set working directory
 WORKDIR /var/www/html
 
-CMD ["php-fpm"]
+# entrypoint
+COPY entrypoint.sh /var/www/bin/entrypoint.sh
+RUN chmod +x /var/www/bin/entrypoint.sh
+
+CMD [ "/var/www/bin/entrypoint.sh" ]
